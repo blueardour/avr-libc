@@ -12,7 +12,6 @@ void uart_puth(u08);
 void uart_puts(const char *);
 u08  uart_getc(void);
 
-void uart_putp(const char *);
 void uart_flush(void);
 
 
@@ -22,7 +21,18 @@ void uart_flush(void);
 #define UART_Rx_INTERRUPT_ENABLE 0
 
 
-#if defined(__GNUC__) && defined(__GNUC_MINOR__)
+#if defined (STM32F10X_LD) || defined (STM32F10X_LD_VL) || \
+      defined (STM32F10X_MD) || defined (STM32F10X_MD_VL) || \
+      defined (STM32F10X_HD) || defined (STM32F10X_HD_VL) || \
+      defined (STM32F10X_XL) || defined (STM32F10X_CL)
+
+#define UART_PORT GPIOA
+#define UART_UART USART1 
+#define UART_APB_Periph RCC_APB2Periph_USART1
+
+#endif // STM32F_XXX
+
+#if defined(__GNUC__) || defined (__ICC_VERSION)
 
 #define uart_printf printf
 
@@ -89,8 +99,10 @@ void uart_flush(void);
   #define UART0_DATA     UDR 
   #define UART0_UDRIE    UDRIE
 	
-#elif  defined(__AVR_ATmega8__)  || defined(__AVR_ATmega16__) || defined(__AVR_ATmega32__) \
-  || defined(__AVR_ATmega323__)
+#elif  defined(__AVR_ATmega8__)  || defined(__AVR_ATmega16__) || \
+	   defined(__AVR_ATmega32__) || defined(__AVR_ATmega323__)|| \
+	   defined(ATMega8)  || defined(ATMega16) || \
+	   defined(ATMega32) || defined(ATMega323) 
 	
   /* ATmega with one USART */
   #define ATMEGA_USART
@@ -237,7 +249,7 @@ void uart_flush(void);
    #define UART0_UDRIE    UDRIE0
 	 
 #elif defined(__AVR_ATmega3290__) ||\
-      defined(__AVR_ATmega6490__) ||
+      defined(__AVR_ATmega6490__)
 			
   /* TLS-Separated these two from the previous group because of inconsistency in the USART_RX */
   /* ATmega with one USART */
@@ -299,17 +311,7 @@ void uart_flush(void);
   #error "no UART definition for MCU available"
 #endif
 
+#endif  // #if defined(__GNUC__) || defined (__ICC_VERSION)
 
-#elif defined (STM32F10X_LD) || defined (STM32F10X_LD_VL) || \
-      defined (STM32F10X_MD) || defined (STM32F10X_MD_VL) || \
-      defined (STM32F10X_HD) || defined (STM32F10X_HD_VL) || \
-      defined (STM32F10X_XL) || defined (STM32F10X_CL)
-
-#define UART_PORT GPIOA
-#define UART_UART USART1 
-#define UART_APB_Periph RCC_APB2Periph_USART1
-
-#endif
-
-#endif
+#endif  // #ifndef _UART_H_
 

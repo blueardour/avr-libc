@@ -8,6 +8,10 @@
 #ifndef AVRLIBDEFS_H
 #define AVRLIBDEFS_H
 
+
+// both ICCAVR and gcc-avr use macros.h
+#include <macros.h>
+
 #ifndef BIT
 	#define BIT _BV
 #endif
@@ -35,12 +39,19 @@
 #ifndef sbi
 	#define sbi(reg,bit)		reg |= (BV(bit))
 #endif
-#ifndef cli
-	#define cli()			__asm__ __volatile__ ("cli" ::)
+
+#if defined(__GNUC__) && defined(__GNUC_MINOR__)
+
+#ifndef CLI
+  #define CLI 		  cli
 #endif
-#ifndef sei
-	#define sei()			__asm__ __volatile__ ("sei" ::)
+
+#ifndef SEI
+  #define SEI		  sei
 #endif
+
+#endif
+
 
 // support for individual port pin naming in the mega128
 // see port128.h for details

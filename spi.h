@@ -15,7 +15,7 @@
 
 #define SPI_INTERRUPT_ENABLE 0
 
-void spi_init(void);
+void spi_init(char);
 u08  spi_master_setup(u08 div,u08 mode); // SPI_CLK = F_CLK / div;
 
 void spi_cs_on(void);
@@ -25,7 +25,9 @@ void spi_master_nSendByte(u08 data);
 u08  spi_master_SendByte(u08 data);
 u08  spi_master_GetByte(void);
 
-#ifdef __AVR_ATmega128__
+#if defined (__GNUC__) || defined (__ICC_VERSION) 
+
+#if defined(__AVR_ATmega128__) || defined(ATMega128)
 
 #define SPI_PORT PORTB
 #define SPI_DIN  PINB
@@ -35,7 +37,7 @@ u08  spi_master_GetByte(void);
 #define MOSI     PB2
 #define SS       PB0
 
-#elif __AVR_ATmega8__
+#elif defined(__AVR_ATmega8__) || defined(ATMega8)
 
 #define SPI_PORT PORTB
 #define SPI_DIN  PINB
@@ -45,7 +47,7 @@ u08  spi_master_GetByte(void);
 #define MOSI     PB3
 #define SS       PB2
 
-#elif __AVR_ATmega16__
+#elif defined(__AVR_ATmega16__) || defined(ATMega16)
 
 #define SPI_PORT PORTB
 #define SPI_DIN  PINB
@@ -55,7 +57,12 @@ u08  spi_master_GetByte(void);
 #define MOSI     PB5
 #define SS       PB4
 
-#elif defined (STM32F10X_LD) || defined (STM32F10X_LD_VL) || \
+#endif
+
+#endif // #if defined (__GNUC__) || defined (__ICC_VERSION) 
+
+
+#if defined (STM32F10X_LD) || defined (STM32F10X_LD_VL) || \
       defined (STM32F10X_MD) || defined (STM32F10X_MD_VL) || \
       defined (STM32F10X_HD) || defined (STM32F10X_HD_VL) || \
       defined (STM32F10X_XL) || defined (STM32F10X_CL)

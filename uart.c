@@ -11,7 +11,56 @@ void uart_puts(const char * str)
 }
 
 
-#if defined(__GNUC__) && defined(__GNUC_MINOR__)
+#if defined (STM32F10X_LD) || defined (STM32F10X_LD_VL) || \
+    defined (STM32F10X_MD) || defined (STM32F10X_MD_VL) || \
+    defined (STM32F10X_HD) || defined (STM32F10X_HD_VL) || \
+    defined (STM32F10X_XL) || defined (STM32F10X_CL)
+
+void uart_init(u32 baud)
+{
+  USART_InitTypeDef UASRT_Initstructure;
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  UASRT_Initstructure.USART_BaudRate = baud;
+  UASRT_Initstructure.USART_WordLength = USART_WordLength_8b;
+  UASRT_Initstructure.USART_StopBits = USART_StopBits_1;
+  UASRT_Initstructure.USART_Parity = USART_Parity_No;
+  UASRT_Initstructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  UASRT_Initstructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+	
+  RCC_APB2PeriphClockCmd(PORT_APB_Periph(UART_PORT) | UART_APB_Periph, ENABLE);
+	
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(UART_PORT, &GPIO_InitStructure);
+	
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  GPIO_Init(UART_PORT, &GPIO_InitStructure);
+		
+  USART_Init(UART_UART, &UASRT_Initstructure);
+	
+  /* Enable USART1 Receive and Transmit interrupts */
+  USART_ITConfig(UART_UART, USART_IT_RXNE, ENABLE); 
+		
+  USART_Cmd(UART_UART, ENABLE);
+  UART_Ready = 1;	
+}	
+
+void uart_putc(u08 data)
+{
+  while(USART_GetFlagStatus(UART_UART,USART_FLAG_TXE) == RESET) ;
+  USART_SendData(UART_UART,data);
+}
+
+void uart_flush(void)
+{
+  while(USART_GetFlagStatus(UART_UART,USART_FLAG_TXE) == RESET) ;
+}
+
+#elif defined (__GNUC__) || defined (__ICC_VERSION) 
+
 
 void uart_init(u32 baud)
 {
@@ -121,20 +170,12 @@ void uart_putc9(u16 data)
   UART0_DATA = data;
 }
 
-u08 uart_getc()
+u08 uart_getc(void)
 {
   while(!(UART0_STATUS & (1<<RXC))) ;
   
   return UART0_DATA;
 }
-
-void uart_putp(const char * flash_str)
-{
-  u08 c;
-  while((c = pgm_read_byte(flash_str++)))
-   uart_putc(c);
-}
-
 
 void uart_puth(u08 c)
 {
@@ -166,52 +207,4 @@ SIGNAL ( UART0_RECEIVE_INTERRUPT )
 
 #endif
 
-#else
-
-void uart_init(u32 baud)
-{
-  USART_InitTypeDef UASRT_Initstructure;
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-  UASRT_Initstructure.USART_BaudRate = baud;
-  UASRT_Initstructure.USART_WordLength = USART_WordLength_8b;
-  UASRT_Initstructure.USART_StopBits = USART_StopBits_1;
-  UASRT_Initstructure.USART_Parity = USART_Parity_No;
-  UASRT_Initstructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  UASRT_Initstructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	
-  RCC_APB2PeriphClockCmd(PORT_APB_Periph(UART_PORT) | UART_APB_Periph, ENABLE);
-	
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(UART_PORT, &GPIO_InitStructure);
-	
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-  GPIO_Init(UART_PORT, &GPIO_InitStructure);
-		
-  USART_Init(UART_UART, &UASRT_Initstructure);
-	
-  /* Enable USART1 Receive and Transmit interrupts */
-  USART_ITConfig(UART_UART, USART_IT_RXNE, ENABLE); 
-		
-  USART_Cmd(UART_UART, ENABLE);
-  UART_Ready = 1;	
-}	
-
-void uart_putc(u08 data)
-{
-  while(USART_GetFlagStatus(UART_UART,USART_FLAG_TXE) == RESET) ;
-  USART_SendData(UART_UART,data);
-}
-
-void uart_flush(void)
-{
-  while(USART_GetFlagStatus(UART_UART,USART_FLAG_TXE) == RESET) ;
-}
-
 #endif
-
-
-

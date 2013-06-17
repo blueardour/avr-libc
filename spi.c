@@ -1,7 +1,7 @@
 
 #include "spi.h"
 
-#if defined(__GNUC__) && defined(__GNUC_MINOR__)
+#if defined(__GNUC__) || defined (__ICC_VERSION)
 
 // SPI interrupt service handler
 #if(SPI_INTERRUPT_ENABLE)
@@ -28,10 +28,13 @@ void spi_cs_off(void)
 }
 
 
-void spi_init()
+void spi_init(char bit)
 {
   //set SCK SS MOSI ouput
   SPI_DDR  |= (1<<SCK) | (1<<MOSI);
+  
+  //set SS if desired
+  if(bit != 0) SPI_DDR |= (1<<SS);
 	
   // Pull up SCK, SS (no mater SS is an input or output)
   SPI_PORT |= (1<<SCK) | (1<<SS);

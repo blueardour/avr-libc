@@ -46,9 +46,14 @@ typedef unsigned char	uchar;
 typedef unsigned int	UINT;
 typedef unsigned short  USHORT;
 typedef unsigned long	ULONG;
-typedef char		CHAR;
-typedef int		INT;
-typedef long		LONG;
+typedef char			CHAR;
+typedef int				INT;
+typedef long			LONG;
+#endif
+
+
+#ifdef __ICC_VERSION
+
 #endif
 
 #endif
